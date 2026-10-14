@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saad & Minnie — Our Little Vintage Universe</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        vintage: {
+                            ivory: '#F4EBDD',
+                            parchment: '#E8D8BE',
+                            espresso: '#38261F',
+                            burgundy: '#642E35',
+                            gold: '#B49A62',
+                            olive: '#74775A',
+                            ink: '#211C19'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        script: ['Great Vibes', 'cursive'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #211C19;
+            color: #F4EBDD;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .vintage-border {
+            border: 1px solid #B49A62;
+            position: relative;
+        }
+        .vintage-border::before {
+            content: '';
+            position: absolute;
+            top: 3px; left: 3px; right: 3px; bottom: 3px;
+            border: 1px solid rgba(180, 154, 98, 0.3);
+            pointer-events: none;
+        }
+        
+        .parchment-bg {
+            background-color: #E8D8BE;
+            color: #38261F;
+        }
+        
+        .glass-panel {
+            background: rgba(56, 38, 31, 0.85);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(180, 154, 98, 0.3);
+        }
+
+        /* Gramophone & Needle Arm Dynamics */
+        .gramophone-container {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .vinyl-record {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #111 0%, #222 30%, #000 35%, #111 40%, #111 70%, #050505 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(180,154,98,0.3);
+            position: relative;
+            border: 2px solid #333;
+            transition: transform 0.5s ease;
+        }
+        .vinyl-grooves {
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            border: 1px dashed rgba(255,255,255,0.12);
+            pointer-events: none;
+        }
+        .vinyl-label {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: #642E35;
+            border: 1.5px solid #B49A62;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #F4EBDD;
+            font-size: 7px;
+        }
+        .needle-arm {
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            width: 24px;
+            height: 35px;
+            border-right: 2px solid #B49A62;
+            border-top: 2px solid #B49A62;
+            transform-origin: top right;
+            transform: rotate(-35deg);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            z-index: 10;
+        }
+        .needle-arm::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: -2px;
+            width: 5px; height: 5px;
+            background: #B49A62;
+            border-radius: 50%;
+        }
+        .playing .needle-arm {
+            transform: rotate(12deg);
+        }
+        .spinning {
+            animation: spin 6s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Equalizer Waveform */
+        .eq-bar {
+            width: 3px;
+            background-color: #B49A62;
+            border-radius: 2px;
+            animation: eqBounce 1.2s ease-in-out infinite alternate;
+        }
+        .eq-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+        .eq-bar:nth-child(2) { height: 14px; animation-delay: 0.3s; }
+        .eq-bar:nth-child(3) { height: 10px; animation-delay: 0.2s; }
+        .eq-bar:nth-child(4) { height: 18px; animation-delay: 0.4s; }
+        @keyframes eqBounce {
+            0% { transform: scaleY(0.3); }
+            100% { transform: scaleY(1.1); }
+        }
+
+        /* Wax Seal Styling */
+        .wax-seal {
+            width: 42px;
+            height: 42px;
+            background: radial-gradient(circle, #8b0000 0%, #642E35 70%, #381015 100%);
+            border-radius: 50%;
+            border: 2px solid #B49A62;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #B49A62;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .wax-seal:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 15px rgba(180, 154, 98, 0.5);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #211C19; }
+        ::-webkit-scrollbar-thumb { background: #B49A62; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #E8D8BE; }
+    </style>
+</head>
+<body class="antialiased selection:bg-vintage-gold selection:text-vintage-espresso">
+
+    <!-- CINEMATIC OPENING SCREEN WITH SONG SELECTION -->
+    <div id="intro-overlay" class="fixed inset-0 z-50 bg-vintage-ink flex flex-col items-center justify-center p-6 transition-opacity duration-1000">
+        <div class="max-w-xl w-full p-8 md:p-10 glass-panel vintage-border rounded-lg text-center relative shadow-2xl">
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 bg-vintage-espresso text-vintage-gold text-xs font-serif uppercase tracking-widest border border-vintage-gold">
+                Interactive Vault
+            </div>
+            <p class="font-serif italic text-vintage-parchment text-lg md:text-xl mb-4">
+                "Every great love story is written in quiet moments and forever memories."
+            </p>
+            <h1 class="font-serif text-3xl md:text-5xl text-vintage-ivory mb-1 tracking-wide">Saad & Minnie</h1>
+            <p class="font-sans text-xs text-vintage-gold tracking-widest uppercase mb-6">Choose an Opening Soundtrack to Begin</p>
+            
+            <!-- Dynamic Music Selection Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-6 text-left" id="intro-song-selector">
+                <button onclick="selectIntroSong(0)" class="p-3 bg-vintage-espresso/70 hover:bg-vintage-burgundy border border-vintage-gold/40 rounded transition-all flex items-center gap-3 group">
+                    <i class="fa-solid fa-compact-disc text-vintage-gold group-hover:rotate-180 transition-transform"></i>
+                    <div class="truncate">
+                        <span class="block text-xs font-serif text-vintage-ivory font-semibold truncate">Iraaday</span>
+                        <span class="block text-[10px] text-vintage-parchment truncate">Abdul Hannan & Rovalio</span>
+                    </div>
+                </button>
+                <button onclick="selectIntroSong(1)" class="p-3 bg-vintage-espresso/70 hover:bg-vintage-burgundy border border-vintage-gold/40 rounded transition-all flex items-center gap-3 group">
+                    <i class="fa-solid fa-compact-disc text-vintage-gold group-hover:rotate-180 transition-transform"></i>
+                    <div class="truncate">
+                        <span class="block text-xs font-serif text-vintage-ivory font-semibold truncate">Be My Baby</span>
+                        <span class="block text-[10px] text-vintage-parchment truncate">The Ronettes</span>
+                    </div>
+                </button>
+                <button onclick="selectIntroSong(2)" class="p-3 bg-vintage-espresso/70 hover:bg-vintage-burgundy border border-vintage-gold/40 rounded transition-all flex items-center gap-3 group">
+                    <i class="fa-solid fa-compact-disc text-vintage-gold group-hover:rotate-180 transition-transform"></i>
+                    <div class="truncate">
+                        <span class="block text-xs font-serif text-vintage-ivory font-semibold truncate">Stay</span>
+                        <span class="block text-[10px] text-vintage-parchment truncate">Justin Bieber & Kid LAROI</span>
+                    </div>
+                </button>
+                <button onclick="selectIntroSong(3)" class="p-3 bg-vintage-espresso/70 hover:bg-vintage-burgundy border border-vintage-gold/40 rounded transition-all flex items-center gap-3 group">
+                    <i class="fa-solid fa-compact-disc text-vintage-gold group-hover:rotate-180 transition-transform"></i>
+                    <div class="truncate">
+                        <span class="block text-xs font-serif text-vintage-ivory font-semibold truncate">Arz Kya Hai</span>
+                        <span class="block text-[10px] text-vintage-parchment truncate">Anuv Jain</span>
+                    </div>
+                </button>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button onclick="enterUniverse()" class="w-full sm:w-auto px-8 py-3 bg-vintage-burgundy hover:bg-vintage-gold text-vintage-ivory hover:text-vintage-espresso font-serif tracking-wider text-sm border border-vintage-gold transition-all duration-300 rounded shadow-lg flex items-center justify-center gap-2">
+                    <span>Open Our Universe</span> 🕊️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PERSISTENT AUDIO BAR -->
+    <div id="player-bar" class="fixed bottom-4 right-4 left-4 sm:left-auto sm:w-96 z-40 glass-panel p-3.5 rounded-2xl vintage-border shadow-2xl transition-all duration-300">
+        <div class="flex items-center gap-3">
+            
+            <!-- Gramophone Vinyl Disc + Needle Arm -->
+            <div id="gramophone-box" class="gramophone-container cursor-pointer" onclick="togglePlayMusic()" title="Click to Play/Pause">
+                <div class="needle-arm"></div>
+                <div id="gramophone-disc" class="vinyl-record">
+                    <div class="vinyl-grooves"></div>
+                    <div class="vinyl-label"><i class="fa-solid fa-music text-[9px]"></i></div>
+                </div>
+            </div>
+
+            <!-- Song Info & Controls -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-0.5">
+                    <span id="current-song-title" class="text-xs font-serif text-vintage-ivory truncate font-semibold">Select a Track</span>
+                    <div id="eq-indicator" class="hidden flex items-center gap-0.5 h-4">
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                    </div>
+                </div>
+                <p id="current-song-artist" class="text-[10px] text-vintage-parchment truncate mb-1">Saad & Minnie Playlist</p>
+                
+                <!-- Track Scrubber -->
+                <div class="flex items-center gap-2 mb-1">
+                    <span id="curr-time" class="text-[9px] text-vintage-gold/80 font-mono">0:00</span>
+                    <input type="range" id="track-slider" min="0" max="100" value="0" oninput="seekAudio(this.value)" class="w-full accent-vintage-gold h-1 bg-vintage-espresso cursor-pointer rounded">
+                    <span id="total-time" class="text-[9px] text-vintage-gold/80 font-mono">0:00</span>
+                </div>
+
+                <!-- Buttons & Volume -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button onclick="prevTrack()" class="text-vintage-gold hover:text-vintage-ivory text-xs"><i class="fa-solid fa-backward-step"></i></button>
+                        <button onclick="togglePlayMusic()" id="play-pause-btn" class="text-vintage-gold hover:text-vintage-ivory text-xs"><i class="fa-solid fa-play"></i></button>
+                        <button onclick="nextTrack()" class="text-vintage-gold hover:text-vintage-ivory text-xs"><i class="fa-solid fa-forward-step"></i></button>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-volume-high text-[10px] text-vintage-gold"></i>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.8" onchange="setVolume(this.value)" class="w-14 accent-vintage-gold h-1 bg-vintage-espresso cursor-pointer rounded">
+                        <button onclick="openMusicModal()" class="ml-1 text-vintage-gold hover:text-vintage-ivory text-xs" title="Music Room"><i class="fa-solid fa-compact-disc"></i></button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- HIDDEN AUDIO ELEMENT (NO LOOP -> AUTO NEXT TRACK) -->
+    <audio id="bg-audio"></audio>
+
+    <!-- NAVIGATION BAR -->
+    <header class="sticky top-0 z-30 glass-panel border-b border-vintage-gold/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="#home" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-vintage-burgundy border border-vintage-gold flex items-center justify-center font-serif text-vintage-gold text-lg">
+                    S&M
+                </div>
+                <div>
+                    <span class="font-serif text-lg tracking-wider text-vintage-ivory block leading-none">Saad & Minnie</span>
+                    <span class="text-[10px] font-sans tracking-widest text-vintage-gold uppercase">Vintage Memory Archive</span>
+                </div>
+            </a>
+            
+            <!-- Desktop Nav Links -->
+            <nav class="hidden lg:flex items-center gap-6 text-xs font-sans tracking-widest uppercase text-vintage-parchment">
+                <a href="#home" class="hover:text-vintage-gold transition-colors">Home</a>
+                <a href="#chapters" class="hover:text-vintage-gold transition-colors">Life Chapters</a>
+                <a href="#gallery" class="hover:text-vintage-gold transition-colors">Media Vault</a>
+                <a href="#letters" class="hover:text-vintage-gold transition-colors">Letters</a>
+                <a href="#secrets" class="hover:text-vintage-gold transition-colors">Surprises ✨</a>
+                <button onclick="checkAdminAuth()" class="hover:text-vintage-gold transition-colors text-vintage-gold font-semibold flex items-center gap-1 bg-vintage-burgundy/50 px-3 py-1.5 rounded border border-vintage-gold/40">
+                    <i class="fa-solid fa-lock text-[10px]" id="nav-lock-icon"></i> Admin Studio
+                </button>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <button onclick="triggerTimeMachine()" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded bg-vintage-burgundy/60 hover:bg-vintage-gold text-vintage-ivory hover:text-vintage-espresso text-xs font-serif border border-vintage-gold/50 transition-all">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Time Machine
+                </button>
+                <button onclick="toggleMobileMenu()" class="lg:hidden text-vintage-gold text-xl p-2">
+                    <i class="fa-solid fa-bars" id="mobile-menu-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden glass-panel border-t border-vintage-gold/20 px-6 py-4 flex flex-col gap-3 text-sm font-sans tracking-widest uppercase">
+            <a href="#home" onclick="toggleMobileMenu()" class="hover:text-vintage-gold">Home</a>
+            <a href="#chapters" onclick="toggleMobileMenu()" class="hover:text-vintage-gold">Life Chapters</a>
+            <a href="#gallery" onclick="toggleMobileMenu()" class="hover:text-vintage-gold">Media Vault</a>
+            <a href="#letters" onclick="toggleMobileMenu()" class="hover:text-vintage-gold">Letters</a>
+            <a href="#secrets" onclick="toggleMobileMenu()" class="hover:text-vintage-gold">Surprises ✨</a>
+            <button onclick="checkAdminAuth(); toggleMobileMenu();" class="text-left text-vintage-gold font-semibold py-1 flex items-center gap-2">
+                <i class="fa-solid fa-lock text-xs"></i> Admin Studio (Saad Only)
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-24">
+
+        <!-- SECTION 1: HERO HOME -->
+        <section id="home" class="min-h-[75vh] flex flex-col items-center justify-center text-center relative py-12">
+            <div class="absolute inset-0 -z-10 flex items-center justify-center opacity-10 pointer-events-none">
+                <span class="font-serif text-[18vw] text-vintage-gold tracking-tighter">SM</span>
+            </div>
+            
+            <div class="inline-block px-4 py-1 rounded-full border border-vintage-gold/40 bg-vintage-espresso/60 text-vintage-gold text-xs font-sans tracking-widest uppercase mb-6 animate-pulse">
+                Forever & Always • Saad & Minnie
+            </div>
+            
+            <h1 class="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-vintage-ivory mb-6 leading-tight">
+                Our Life Chapters & Memories
+            </h1>
+            
+            <p class="font-serif italic text-lg sm:text-2xl text-vintage-parchment max-w-2xl mx-auto mb-10">
+                "A visual chronicle of the milestones we have achieved and the beautiful chapters waiting to unfold."
+            </p>
+
+            <!-- RELATIONSHIP COUNTER -->
+            <div class="glass-panel p-6 rounded-lg vintage-border max-w-xl w-full mb-10 shadow-xl">
+                <p class="text-xs font-sans uppercase tracking-widest text-vintage-gold mb-3">Time We've Been Blessed Together</p>
+                <div id="relationship-counter" class="grid grid-cols-4 gap-2 text-vintage-ivory font-serif">
+                    <div class="p-2 bg-vintage-espresso/50 rounded border border-vintage-gold/20">
+                        <span id="count-days" class="text-2xl sm:text-3xl font-bold block text-vintage-gold">000</span>
+                        <span class="text-[10px] uppercase font-sans tracking-wider text-vintage-parchment">Days</span>
+                    </div>
+                    <div class="p-2 bg-vintage-espresso/50 rounded border border-vintage-gold/20">
+                        <span id="count-hours" class="text-2xl sm:text-3xl font-bold block text-vintage-gold">00</span>
+                        <span class="text-[10px] uppercase font-sans tracking-wider text-vintage-parchment">Hours</span>
+                    </div>
+                    <div class="p-2 bg-vintage-espresso/50 rounded border border-vintage-gold/20">
+                        <span id="count-mins" class="text-2xl sm:text-3xl font-bold block text-vintage-gold">00</span>
+                        <span class="text-[10px] uppercase font-sans tracking-wider text-vintage-parchment">Minutes</span>
+                    </div>
+                    <div class="p-2 bg-vintage-espresso/50 rounded border border-vintage-gold/20">
+                        <span id="count-secs" class="text-2xl sm:text-3xl font-bold block text-vintage-gold">00</span>
+                        <span class="text-[10px] uppercase font-sans tracking-wider text-vintage-parchment">Seconds</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <a href="#chapters" class="px-8 py-3.5 bg-vintage-burgundy hover:bg-vintage-gold text-vintage-ivory hover:text-vintage-espresso font-serif tracking-wider text-sm border border-vintage-gold transition-all duration-300 rounded shadow-lg flex items-center gap-2">
+                    Explore Life Chapters 🎬
+                </a>
+                <button onclick="checkAdminAuth()" class="px-8 py-3.5 bg-vintage-espresso hover:bg-vintage-parchment text-vintage-gold hover:text-vintage-espresso font-serif tracking-wider text-sm border border-vintage-gold transition-all duration-300 rounded shadow-lg flex items-center gap-2">
+                    <i class="fa-solid fa-lock text-xs"></i> Admin Upload Studio
+                </button>
+            </div>
+        </section>
+
+        <!-- SECTION 2: LIFE CHAPTERS -->
+        <section id="chapters" class="space-y-12">
+            <div class="text-center">
+                <span class="text-xs font-sans tracking-widest text-vintage-gold uppercase">Milestones & Achievements</span>
+                <h2 class="font-serif text-3xl sm:text-5xl text-vintage-ivory mt-2">Life Chapters</h2>
+                <p class="text-vintage-parchment text-sm max-w-xl mx-auto mt-2">Click any chapter to toggle its video/photo array. Unlock Admin Studio to upload from phone gallery or delete existing photos.</p>
+                <div class="w-24 h-0.5 bg-vintage-gold mx-auto mt-4"></div>
+            </div>
+
+            <div id="chapters-timeline-container" class="space-y-8">
+                <!-- Dynamically Rendered Interactive Chapters -->
+            </div>
+        </section>
+
+        <!-- SECTION 3: VINTAGE PHOTO & VIDEO GALLERY -->
+        <section id="gallery" class="space-y-8 pt-8">
+            <div class="text-center">
+                <span class="text-xs font-sans tracking-widest text-vintage-gold uppercase">Photographic & Video Archive</span>
+                <h2 class="font-serif text-3xl sm:text-5xl text-vintage-ivory mt-2">Media Vault</h2>
+                <div class="w-24 h-0.5 bg-vintage-gold mx-auto mt-4"></div>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex flex-wrap items-center justify-center gap-2" id="gallery-filter-bar">
+                <button onclick="filterGallery('All')" class="px-4 py-1.5 rounded-full border border-vintage-gold text-xs font-sans uppercase tracking-widest bg-vintage-burgundy text-vintage-gold transition-all filter-btn active-filter" data-filter="All">All Media</button>
+                <button onclick="filterGallery('Chapter 1')" class="px-4 py-1.5 rounded-full border border-vintage-gold/50 text-xs font-sans uppercase tracking-widest text-vintage-parchment hover:text-vintage-gold transition-all filter-btn" data-filter="Chapter 1">Ch 1: Meeting</button>
+                <button onclick="filterGallery('Chapter 2')" class="px-4 py-1.5 rounded-full border border-vintage-gold/50 text-xs font-sans uppercase tracking-widest text-vintage-parchment hover:text-vintage-gold transition-all filter-btn" data-filter="Chapter 2">Ch 2: Falling For You</button>
+                <button onclick="filterGallery('Chapter 3')" class="px-4 py-1.5 rounded-full border border-vintage-gold/50 text-xs font-sans uppercase tracking-widest text-vintage-parchment hover:text-vintage-gold transition-all filter-btn" data-filter="Chapter 3">Ch 3: Our Travels</button>
+                <button onclick="filterGallery('Chapter 4')" class="px-4 py-1.5 rounded-full border border-vintage-gold/50 text-xs font-sans uppercase tracking-widest text-vintage-parchment hover:text-vintage-gold transition-all filter-btn" data-filter="Chapter 4">Ch 4: Everyday Life</button>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Rendered media items -->
+            </div>
+        </section>
+
+        <!-- SECTION 4: LOVE LETTERS WITH WAX SEALS -->
+        <section id="letters" class="space-y-8 pt-8">
+            <div class="text-center">
+                <span class="text-xs font-sans tracking-widest text-vintage-gold uppercase">Handwritten Vault</span>
+                <h2 class="font-serif text-3xl sm:text-5xl text-vintage-ivory mt-2">Letters from Saad to Minnie</h2>
+                <div class="w-24 h-0.5 bg-vintage-gold mx-auto mt-4"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div onclick="openLetterModal('Open When You Need Encouragement', 'Dearest Minnie,\n\nWhenever challenges feel heavy, remember how fiercely resilient and brilliant you are. You support my web development career and goals with endless grace. I believe in you just as much as you believe in me.\n\nForever yours,\nSaad')" class="glass-panel p-6 rounded-lg vintage-border cursor-pointer hover:border-vintage-ivory transition-all group flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-serif text-vintage-gold italic">Confidential</span>
+                            <div class="wax-seal">S&M</div>
+                        </div>
+                        <h3 class="font-serif text-xl text-vintage-ivory mb-2">Open When You Need Encouragement</h3>
+                        <p class="text-xs text-vintage-parchment italic">A quiet reminder of your strength and my unwavering support.</p>
+                    </div>
+                    <span class="text-[10px] text-vintage-gold font-serif mt-4 block">Click wax seal to unseal letter →</span>
+                </div>
+
+                <div onclick="openLetterModal('Jhinaidah Water Park Memory', 'My Sweet Minnie,\n\nThat day at the Jhinaidah Water Park will forever be etched in my heart. You gently applying sunscreen on me, standing right beside me all day long, and our magical first kiss in the swimming pool—it felt like a dream. Thank you for making every moment pure magic.\n\nWith all my love,\nSaad')" class="glass-panel p-6 rounded-lg vintage-border cursor-pointer hover:border-vintage-ivory transition-all group flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-serif text-vintage-gold italic">First Kiss Memory</span>
+                            <div class="wax-seal">S&M</div>
+                        </div>
+                        <h3 class="font-serif text-xl text-vintage-ivory mb-2">Open When You Remember Our Travels</h3>
+                        <p class="text-xs text-vintage-parchment italic">Recalling our first kiss in the pool and sunscreen care.</p>
+                    </div>
+                    <span class="text-[10px] text-vintage-gold font-serif mt-4 block">Click wax seal to unseal letter →</span>
+                </div>
+
+                <div onclick="openLetterModal('To Minnie, My Future Wife', 'Minnie,\n\nFrom online best friends to planning our marriage together, every second with you has been a blessing. You are my favorite person, my greatest cheerleader, and my future.\n\nYours always and forever,\nSaad')" class="glass-panel p-6 rounded-lg vintage-border cursor-pointer hover:border-vintage-ivory transition-all group flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-serif text-vintage-gold italic">Marriage Vow</span>
+                            <div class="wax-seal">S&M</div>
+                        </div>
+                        <h3 class="font-serif text-xl text-vintage-ivory mb-2">To Minnie, My Future Wife</h3>
+                        <p class="text-xs text-vintage-parchment italic">Our promise of marriage and a lifetime built on deep love.</p>
+                    </div>
+                    <span class="text-[10px] text-vintage-gold font-serif mt-4 block">Click wax seal to unseal letter →</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: INTERACTIVE SURPRISES -->
+        <section id="secrets" class="space-y-8 pt-8">
+            <div class="text-center">
+                <span class="text-xs font-sans tracking-widest text-vintage-gold uppercase">Interactive Surprises</span>
+                <h2 class="font-serif text-3xl sm:text-5xl text-vintage-ivory mt-2">Reasons Why I Love Minnie ✨</h2>
+                <div class="w-24 h-0.5 bg-vintage-gold mx-auto mt-4"></div>
+            </div>
+
+            <div class="glass-panel p-8 sm:p-12 rounded-lg vintage-border text-center max-w-2xl mx-auto shadow-2xl relative overflow-hidden">
+                <div id="heart-particle-container" class="absolute inset-0 pointer-events-none"></div>
+                <div id="compliment-box" class="font-serif text-xl sm:text-2xl text-vintage-ivory italic mb-8 min-h-[80px] flex items-center justify-center transition-opacity duration-300">
+                    "Click the button below to discover why Saad loves you exceptionally, Minnie."
+                </div>
+                <button onclick="generateRandomCompliment()" class="px-8 py-3.5 bg-vintage-burgundy hover:bg-vintage-gold text-vintage-ivory hover:text-vintage-espresso font-serif tracking-wider text-sm border border-vintage-gold transition-all duration-300 rounded shadow-lg">
+                    Reveal Reason Why I Love You 💖
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="glass-panel border-t border-vintage-gold/30 mt-24 py-12 text-center text-xs font-sans tracking-widest text-vintage-parchment uppercase">
+        <p class="mb-2">Crafted with exceptional code and infinite love by <span class="text-vintage-gold font-semibold">Saad</span> for <span class="text-vintage-gold font-semibold">Minnie</span>.</p>
+        <p>© 2026 Saad & Minnie • Our Little Vintage Universe</p>
+    </footer>
+
+    <!-- MODALS -->
+
+    <!-- ADMIN AUTH & DIRECT GALLERY UPLOAD STUDIO MODAL -->
+    <div id="admin-modal" class="fixed inset-0 z-50 bg-black/85 hidden flex items-center justify-center p-4">
+        <div class="glass-panel p-6 sm:p-8 rounded-lg vintage-border max-w-xl w-full relative shadow-2xl">
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-vintage-gold hover:text-vintage-ivory text-lg"><i class="fa-solid fa-xmark"></i></button>
+
+            <!-- Login View -->
+            <div id="admin-login-view" class="space-y-5 text-center">
+                <div class="w-12 h-12 rounded-full bg-vintage-burgundy border border-vintage-gold flex items-center justify-center mx-auto text-vintage-gold text-xl">
+                    <i class="fa-solid fa-user-lock"></i>
+                </div>
+                <div>
+                    <h3 class="font-serif text-2xl text-vintage-ivory">Saad's Admin Studio</h3>
+                    <p class="text-xs text-vintage-parchment mt-1">Authenticate to upload from gallery or delete memories.</p>
+                </div>
+                <div class="space-y-3">
+                    <input type="password" id="admin-pass-input" placeholder="Enter Admin Security Password..." class="w-full bg-vintage-espresso text-vintage-ivory border border-vintage-gold/40 rounded p-3 text-sm focus:outline-none focus:border-vintage-gold text-center">
+                    <button onclick="authenticateAdmin()" class="w-full py-3 bg-vintage-burgundy hover:bg-vintage-gold text-vintage-ivory hover:text-vintage-espresso font-serif text-sm border border-vintage-gold transition-all rounded">
+                        Unlock Admin Studio 🔑
+                    </button>
+                </div>
+            </div>
+
+            <!-- Direct Gallery Upload View (Unlocked) -->
+            <div id="admin-upload-view" class="hidden space-y-5">
+                <div class="flex items-center justify-between border-b border-vintage-gold/30 pb-3">
+                    <div>
+                        <h3 class="font-serif text-xl text-vintage-gold flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Direct Gallery Upload
+                        </h3>
+                        <p class="text-[10px] text-vintage-parchment">Select photos/videos from phone gallery to auto-publish worldwide.</p>
+                    </div>
+                    <button onclick="lockAdminSession()" class="text-xs text-vintage-burgundy hover:text-vintage-ivory underline">Lock Session</button>
+                </div>
+
+                <form id="cloud-upload-form" onsubmit="handleCloudUpload(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-sans uppercase tracking-widest text-vintage-gold mb-1">Target Life Chapter</label>
+                        <select id="upload-chapter-select" class="w-full bg-vintage-espresso text-vintage-ivory border border-vintage-gold/40 rounded p-2.5 text-xs focus:outline-none focus:border-vintage-gold">
+                            <option value="1">Chapter 1: Met Online as Best Friends</option>
+                            <option value="2">Chapter 2: Falling For You 💖</option>
+                            <option value="3">Chapter 3: Our Travels 🏊‍♂️✈️</option>
+                            <option value="4">Chapter 4: Everyday Life ☕</option>
+                            <option value="5">Chapter 5: Engagement / Ring Day (Future Achievement)</option>
+                            <option value="6">Chapter 6: Our Wedding Day (Future Achievement)</option>
+                            <option value="7">Chapter 7: Our First Honeymoon Trip (Future Achievement)</option>
+                            <option value="8">Chapter 8: Our Dream Home Together (Future Achievement)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-sans uppercase tracking-widest text-vintage-gold mb-1">Select Photo/Video from Gallery</label>
+                        <input type="file" id="upload-file-direct" accept="image/*,video/*" required class="w-full bg-vintage-espresso text-vintage-ivory border border-vintage-gold/40 rounded p-2 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-serif file:bg-vintage-burgundy file:text-vintage-gold hover:file:bg-vintage-gold hover:file:text-vintage-espresso cursor-pointer">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-sans uppercase tracking-widest text-vintage-gold mb-1">Title</label>
+                            <input type="text" id="upload-title" required placeholder="e.g. Swimming Pool First Kiss" class="w-full bg-vintage-espresso text-vintage-ivory border border-vintage-gold/40 rounded p-2.5 text-xs focus:outline-none focus:border-vintage-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-sans uppercase tracking-widest text-vintage-gold mb-1">Date</label>
+                            <input type="date" id="upload-date" required class="w-full bg-vintage-espresso text-vintage-ivory border border-vintage-gold/40 rounded p-2.5 text-xs focus:outline-none focus:border-vintage-gold">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-sans uppercase tracking-widest text-vintage-gold mb-1">Memory Caption</label>
+                        <textarea id="upload-caption" rows="2" placeholder="Write a short memory description..." class="w-full bg-vintage-espresso text-vintage-ivory border border-vintage-gold/40 rounded p-2.5 text-xs focus:outline-none focus:border-vintage-gold"></textarea>
+                    </div>
+
+                    <button type="submit" id="upload-submit-btn" class="w-full py-3 bg-vintage-burgundy hover:bg-vintage-gold text-vintage-ivory hover:text-vintage-espresso font-serif text-sm border border-vintage-gold transition-all rounded shadow-lg">
+                        Publish Gallery File Worldwide ✨
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Music Room Modal -->
+    <div id="music-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="glass-panel p-6 sm:p-8 rounded-lg vintage-border max-w-md w-full relative shadow-2xl">
+            <button onclick="closeMusicModal()" class="absolute top-4 right-4 text-vintage-gold hover:text-vintage-ivory text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="font-serif text-2xl text-vintage-ivory mb-4 text-center">Vintage Music Room 🎵</h3>
+            <p class="text-xs text-vintage-parchment text-center mb-6">Select your favorite track for our vintage universe playlist:</p>
+            
+            <div id="playlist-container" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Letter Reading Modal -->
+    <div id="letter-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="parchment-bg p-8 rounded-lg vintage-border max-w-lg w-full relative shadow-2xl text-vintage-espresso">
+            <button onclick="closeLetterModal()" class="absolute top-4 right-4 text-vintage-espresso hover:text-vintage-burgundy text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-letter-title" class="font-serif text-2xl mb-4 border-b border-vintage-espresso/30 pb-2">Letter Title</h3>
+            <div id="modal-letter-body" class="font-serif text-sm whitespace-pre-line leading-relaxed mb-6">Letter content...</div>
+            <div class="text-right font-script text-2xl text-vintage-burgundy">Saad 🕊️</div>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/90 hidden flex flex-col items-center justify-center p-4">
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-vintage-gold hover:text-vintage-ivory text-2xl"><i class="fa-solid fa-xmark"></i></button>
+        <div id="lightbox-content-container" class="max-w-4xl max-h-[80vh] flex flex-col items-center justify-center">
+            <!-- Rendered media -->
+        </div>
+        <p id="lightbox-caption" class="text-vintage-ivory font-serif text-sm mt-4 text-center max-w-xl"></p>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- YOUR CLOUDINARY CONFIGURATION ---
+        const CLOUDINARY_CLOUD_NAME = "dhajksq5s"; 
+        const CLOUDINARY_PRESET = "Minnie";
+
+        let isAdminLoggedIn = false;
+
+        function checkAdminAuth() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.remove('hidden');
+            if (isAdminLoggedIn) {
+                document.getElementById('admin-login-view').classList.add('hidden');
+                document.getElementById('admin-upload-view').classList.remove('hidden');
+            } else {
+                document.getElementById('admin-login-view').classList.remove('hidden');
+                document.getElementById('admin-upload-view').classList.add('hidden');
+            }
+        }
+
+        function authenticateAdmin() {
+            const pass = document.getElementById('admin-pass-input').value;
+            if (pass === "snuggle") {
+                isAdminLoggedIn = true;
+                document.getElementById('admin-login-view').classList.add('hidden');
+                document.getElementById('admin-upload-view').classList.remove('hidden');
+                document.getElementById('nav-lock-icon').className = 'fa-solid fa-lock-open text-[10px] text-green-400';
+                renderLifeChapters();
+            } else {
+                alert("Incorrect password! Access restricted to Saad.");
+            }
+        }
+
+        function lockAdminSession() {
+            isAdminLoggedIn = false;
+            document.getElementById('nav-lock-icon').className = 'fa-solid fa-lock text-[10px]';
+            renderLifeChapters();
+            closeAdminModal();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        // --- ACCURATE LIFE CHAPTERS DEFINITION ---
+        const updatedLifeChapters = [
+            {
+                id: 1,
+                title: "Chapter 1: Met Online as Best Friends",
+                subtitle: "Where our friendship first sparked through screen messages",
+                isAchieved: true,
+                badge: "Achieved ✨",
+                clips: [
+                    {
+                        id: 101,
+                        title: "Online Chatting Era",
+                        date: "2025-05-10",
+                        type: "image",
+                        url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop",
+                        caption: "Building an inseparable friendship across the distance."
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Chapter 2: Falling For You 💖",
+                subtitle: "When friendship bloomed into an exceptional and deep romance",
+                isAchieved: true,
+                badge: "Achieved ✨",
+                clips: [
+                    {
+                        id: 102,
+                        title: "Our Love Realization",
+                        date: "2025-08-15",
+                        type: "image",
+                        url: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=800&auto=format&fit=crop",
+                        caption: "Saad falling completely and utterly obsessed with Minnie."
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Chapter 3: Our Travels 🏊‍♂️✈️",
+                subtitle: "Water park fun in Jhinaidah, Minnie applying sunscreen, and our magical pool kiss",
+                isAchieved: true,
+                badge: "Achieved ✨",
+                clips: [
+                    {
+                        id: 103,
+                        title: "Jhinaidah Tour & First Kiss",
+                        date: "2025-11-20",
+                        type: "image",
+                        url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop",
+                        caption: "Having endless fun in Jhinaidah Water Park, Minnie putting sunscreen on me, and our unforgettable first kiss in the pool."
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "Chapter 4: Everyday Life ☕",
+                subtitle: "Staying connected, sharing quiet everyday moments, and growing together",
+                isAchieved: true,
+                badge: "Achieved ✨",
+                clips: [
+                    {
+                        id: 104,
+                        title: "Daily Cherished Moments",
+                        date: "2026-03-01",
+                        type: "image",
+                        url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&auto=format&fit=crop",
+                        caption: "Minnie supporting Saad and filling every ordinary day with extraordinary happiness."
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: "Chapter 5: Engagement & Ring Day 💍",
+                subtitle: "Future Milestone — To Be Achieved",
+                isAchieved: false,
+                badge: "Future Achievement ⏳",
+                clips: []
+            },
+            {
+                id: 6,
+                title: "Chapter 6: Our Wedding Day 👰🤵",
+                subtitle: "Future Milestone — To Be Achieved",
+                isAchieved: false,
+                badge: "Future Achievement ⏳",
+                clips: []
+            },
+            {
+                id: 7,
+                title: "Chapter 7: Our First Honeymoon Trip ✈️",
+                subtitle: "Future Milestone — To Be Achieved",
+                isAchieved: false,
+                badge: "Future Achievement ⏳",
+                clips: []
+            },
+            {
+                id: 8,
+                title: "Chapter 8: Our Dream Home Together 🏡",
+                subtitle: "Future Milestone — To Be Achieved",
+                isAchieved: false,
+                badge: "Future Achievement ⏳",
+                clips: []
+            }
+        ];
+
+        // Force reset or load updated chapters
+        localStorage.setItem('saad_minnie_chapters', JSON.stringify(updatedLifeChapters));
+        let lifeChapters = updatedLifeChapters;
+
+        function saveChaptersToStorage() {
+            localStorage.setItem('saad_minnie_chapters', JSON.stringify(lifeChapters));
+        }
+
+        function deleteClip(chapterId, clipId) {
+            if (!isAdminLoggedIn) {
+                checkAdminAuth();
+                return;
+            }
+
+            if (confirm("Are you sure you want to delete this photo/video clip permanently?")) {
+                const chapter = lifeChapters.find(c => c.id === chapterId);
+                if (chapter) {
+                    chapter.clips = chapter.clips.filter(clip => clip.id !== clipId);
+                    if (chapter.clips.length === 0 && chapterId > 4) {
+                        chapter.isAchieved = false;
+                        chapter.badge = "Future Achievement ⏳";
+                    }
+
+                    saveChaptersToStorage();
+                    renderLifeChapters();
+                }
+            }
+        }
+
+        function renderLifeChapters() {
+            const container = document.getElementById('chapters-timeline-container');
+            container.innerHTML = '';
+
+            lifeChapters.forEach((chapter, index) => {
+                const card = document.createElement('div');
+                card.className = `glass-panel rounded-lg vintage-border shadow-2xl transition-all overflow-hidden ${chapter.isAchieved ? '' : 'opacity-80 border-dashed'}`;
+
+                let clipsHtml = '';
+                if (chapter.clips && chapter.clips.length > 0) {
+                    clipsHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6 bg-vintage-espresso/40 border-t border-vintage-gold/20">`;
+                    chapter.clips.forEach(clip => {
+                        let mediaContent = clip.type === 'video' 
+                            ? `<video src="${clip.url}" class="w-full h-44 object-cover rounded cursor-pointer" controls onplay="duckAudioDown()" onpause="duckAudioUp()" onended="duckAudioUp()"></video>`
+                            : `<img src="${clip.url}" class="w-full h-44 object-cover rounded cursor-pointer hover:scale-105 transition-transform" onclick="openLightboxMedia('${clip.url}', 'image', '${clip.title}', '${clip.caption}')">`;
+
+                        clipsHtml += `
+                            <div class="p-3 bg-vintage-espresso/70 rounded border border-vintage-gold/20 flex flex-col justify-between relative group">
+                                ${mediaContent}
+                                <div class="mt-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[10px] text-vintage-gold font-mono">${clip.date}</span>
+                                        <button onclick="deleteClip(${chapter.id}, ${clip.id})" class="text-vintage-burgundy hover:text-red-400 text-xs px-1 py-0.5 rounded transition-colors" title="Delete Photo/Video">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                    <h4 class="font-serif text-sm text-vintage-ivory font-semibold mt-0.5">${clip.title}</h4>
+                                    <p class="text-xs text-vintage-parchment/80 mt-1">${clip.caption}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    clipsHtml += `</div>`;
+                } else {
+                    clipsHtml = `
+                        <div class="p-8 text-center bg-vintage-espresso/30 border-t border-vintage-gold/10">
+                            <i class="fa-solid fa-hourglass-half text-vintage-gold/50 text-3xl mb-2"></i>
+                            <p class="font-serif text-sm text-vintage-parchment/70 italic">This achievement chapter is waiting for future moments to unfold.</p>
+                            <p class="text-[10px] text-vintage-gold mt-1">Saad can upload photos & videos here from Admin Studio when achieved.</p>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="p-6 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-vintage-espresso/30 transition-colors" onclick="toggleChapterAccordion(${index})">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-vintage-burgundy border border-vintage-gold flex items-center justify-center text-vintage-gold font-serif font-bold text-sm">
+                                0${chapter.id}
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-sans tracking-widest uppercase px-2 py-0.5 rounded bg-vintage-burgundy text-vintage-gold border border-vintage-gold/30">
+                                    ${chapter.badge}
+                                </span>
+                                <h3 class="font-serif text-xl sm:text-2xl text-vintage-ivory mt-1">${chapter.title}</h3>
+                                <p class="text-xs text-vintage-parchment italic">${chapter.subtitle}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-vintage-gold font-serif">
+                            <span>${chapter.clips.length} Clips</span>
+                            <i class="fa-solid fa-chevron-down text-vintage-gold transition-transform duration-300" id="accordion-icon-${index}"></i>
+                        </div>
+                    </div>
+                    <div id="chapter-body-${index}" class="transition-all duration-300">
+                        ${clipsHtml}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            renderGalleryGrid();
+        }
+
+        function toggleChapterAccordion(index) {
+            const body = document.getElementById(`chapter-body-${index}`);
+            const icon = document.getElementById(`accordion-icon-${index}`);
+            if (body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                body.classList.add('hidden');
+                icon.style.transform = 'rotate(-90deg)';
+            }
+        }
+
+        // DIRECT GALLERY FILE UPLOAD TO CLOUDINARY
+        async function handleCloudUpload(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('upload-file-direct');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert("Please select a photo or video from your gallery!");
+                return;
+            }
+
+            const chapterId = parseInt(document.getElementById('upload-chapter-select').value);
+            const title = document.getElementById('upload-title').value;
+            const date = document.getElementById('upload-date').value;
+            const caption = document.getElementById('upload-caption').value;
+
+            const submitBtn = document.getElementById('upload-submit-btn');
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading from Gallery...';
+            submitBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_PRESET);
+
+            const resourceType = file.type.includes('video') ? 'video' : 'image';
+
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.secure_url) {
+                    const newClip = {
+                        id: Date.now(),
+                        title: title,
+                        date: date,
+                        type: resourceType,
+                        url: data.secure_url,
+                        caption: caption
+                    };
+
+                    const chapter = lifeChapters.find(c => c.id === chapterId);
+                    if (chapter) {
+                        chapter.isAchieved = true;
+                        chapter.badge = "Achieved ✨";
+                        chapter.clips.unshift(newClip);
+
+                        saveChaptersToStorage();
+                        renderLifeChapters();
+                        document.getElementById('cloud-upload-form').reset();
+                        closeAdminModal();
+                        alert("Uploaded successfully from gallery and live worldwide! 🕊️");
+                    }
+                } else {
+                    alert("Upload error! Cloudinary response failed.");
+                }
+            } catch (err) {
+                alert("Upload failed: " + err.message);
+            } finally {
+                submitBtn.innerHTML = 'Publish Gallery File Worldwide ✨';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // --- GALLERY GRID RENDER ---
+        function renderGalleryGrid(filterCategory = 'All') {
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = '';
+
+            let allClips = [];
+            lifeChapters.forEach((ch, idx) => {
+                ch.clips.forEach(clip => {
+                    allClips.push({ ...clip, chapterId: ch.id, chapterName: `Chapter ${idx + 1}` });
+                });
+            });
+
+            const filtered = filterCategory === 'All' ? allClips : allClips.filter(c => c.chapterName === filterCategory);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-vintage-parchment italic">No media uploaded in this category yet. Upload from Admin Studio!</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel rounded-lg vintage-border overflow-hidden shadow-xl flex flex-col group';
+
+                let mediaHtml = item.type === 'video'
+                    ? `<video src="${item.url}" class="w-full h-56 object-cover cursor-pointer" controls onplay="duckAudioDown()" onpause="duckAudioUp()" onended="duckAudioUp()"></video>`
+                    : `<img src="${item.url}" class="w-full h-56 object-cover group-hover:scale-105 transition-transform cursor-pointer" onclick="openLightboxMedia('${item.url}', 'image', '${item.title}', '${item.caption}')">`;
+
+                card.innerHTML = `
+                    <div class="relative overflow-hidden">
+                        ${mediaHtml}
+                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded bg-vintage-espresso/80 text-vintage-gold text-[10px] font-sans tracking-widest uppercase border border-vintage-gold/30">
+                            ${item.chapterName}
+                        </span>
+                        <button onclick="deleteClip(${item.chapterId}, ${item.id})" class="absolute top-3 right-3 bg-vintage-burgundy/90 text-vintage-gold hover:text-red-300 w-7 h-7 rounded-full flex items-center justify-center text-xs border border-vintage-gold/40 transition-colors shadow-md" title="Delete Photo/Video">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <span class="text-[10px] text-vintage-gold font-serif block">${item.date}</span>
+                        <h4 class="font-serif text-base text-vintage-ivory">${item.title}</h4>
+                        <p class="text-xs text-vintage-parchment/80 mt-1">${item.caption}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterGallery(cat) {
+            renderGalleryGrid(cat);
+            document.querySelectorAll('#gallery-filter-bar button').forEach(btn => {
+                if (btn.getAttribute('data-filter') === cat) {
+                    btn.className = 'px-4 py-1.5 rounded-full border border-vintage-gold text-xs font-sans uppercase tracking-widest bg-vintage-burgundy text-vintage-gold transition-all filter-btn active-filter';
+                } else {
+                    btn.className = 'px-4 py-1.5 rounded-full border border-vintage-gold/50 text-xs font-sans uppercase tracking-widest text-vintage-parchment hover:text-vintage-gold transition-all filter-btn';
+                }
+            });
+        }
+
+        // --- PLAYLIST & AUDIO CONTROLLER (AUTO PLAY NEXT TRACK) ---
+        const playlist = [
+            {
+                title: "Iraaday",
+                artist: "Abdul Hannan & Rovalio",
+                src: "https://media.vocaroo.com/mp3/1d7SOHoSHkZ7"
+            },
+            {
+                title: "Be My Baby",
+                artist: "The Ronettes",
+                src: "https://media.vocaroo.com/mp3/1114i0Ooi5vU"
+            },
+            {
+                title: "Stay",
+                artist: "Justin Bieber & The Kid LAROI",
+                src: "https://media.vocaroo.com/mp3/1bsPmbYd3v3M"
+            },
+            {
+                title: "Arz Kya Hai",
+                artist: "Anuv Jain",
+                src: "https://media.vocaroo.com/mp3/19C6FfYreX6K"
+            }
+        ];
+
+        let currentTrackIndex = 0;
+        const audioElement = document.getElementById('bg-audio');
+        const gramophoneBox = document.getElementById('gramophone-box');
+        const discElement = document.getElementById('gramophone-disc');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const songTitleEl = document.getElementById('current-song-title');
+        const songArtistEl = document.getElementById('current-song-artist');
+        const eqIndicator = document.getElementById('eq-indicator');
+        const trackSlider = document.getElementById('track-slider');
+        const currTimeEl = document.getElementById('curr-time');
+        const totalTimeEl = document.getElementById('total-time');
+
+        function initAudio() {
+            loadTrack(currentTrackIndex);
+            renderPlaylistModal();
+
+            audioElement.addEventListener('timeupdate', updateAudioProgress);
+            audioElement.addEventListener('loadedmetadata', () => {
+                totalTimeEl.textContent = formatTime(audioElement.duration);
+            });
+
+            // Automatically Play Next Track when Song Ends
+            audioElement.addEventListener('ended', () => {
+                nextTrack();
+            });
+        }
+
+        function loadTrack(index) {
+            currentTrackIndex = index;
+            const track = playlist[index];
+            audioElement.src = track.src;
+            songTitleEl.textContent = track.title;
+            songArtistEl.textContent = track.artist;
+        }
+
+        function selectIntroSong(index) {
+            loadTrack(index);
+            enterUniverse();
+        }
+
+        function togglePlayMusic() {
+            if (audioElement.paused) {
+                audioElement.play().then(() => {
+                    gramophoneBox.classList.add('playing');
+                    discElement.classList.add('spinning');
+                    playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                    eqIndicator.classList.remove('hidden');
+                }).catch(e => console.log(e));
+            } else {
+                audioElement.pause();
+                gramophoneBox.classList.remove('playing');
+                discElement.classList.remove('spinning');
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                eqIndicator.classList.add('hidden');
+            }
+        }
+
+        function nextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            loadTrack(currentTrackIndex);
+            audioElement.play().then(() => {
+                gramophoneBox.classList.add('playing');
+                discElement.classList.add('spinning');
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                eqIndicator.classList.remove('hidden');
+            }).catch(e => console.log(e));
+        }
+
+        function prevTrack() {
+            currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+            loadTrack(currentTrackIndex);
+            audioElement.play().then(() => {
+                gramophoneBox.classList.add('playing');
+                discElement.classList.add('spinning');
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                eqIndicator.classList.remove('hidden');
+            }).catch(e => console.log(e));
+        }
+
+        function updateAudioProgress() {
+            if (audioElement.duration) {
+                const pct = (audioElement.currentTime / audioElement.duration) * 100;
+                trackSlider.value = pct;
+                currTimeEl.textContent = formatTime(audioElement.currentTime);
+            }
+        }
+
+        function seekAudio(val) {
+            if (audioElement.duration) {
+                audioElement.currentTime = (val / 100) * audioElement.duration;
+            }
+        }
+
+        function formatTime(secs) {
+            if (isNaN(secs)) return "0:00";
+            const m = Math.floor(secs / 60);
+            const s = Math.floor(secs % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function setVolume(val) { audioElement.volume = val; }
+        function openMusicModal() { document.getElementById('music-modal').classList.remove('hidden'); }
+        function closeMusicModal() { document.getElementById('music-modal').classList.add('hidden'); }
+
+        function renderPlaylistModal() {
+            const container = document.getElementById('playlist-container');
+            container.innerHTML = '';
+            playlist.forEach((track, idx) => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded border cursor-pointer flex items-center justify-between transition-colors ${idx === currentTrackIndex ? 'bg-vintage-burgundy/50 border-vintage-gold' : 'bg-vintage-espresso/40 border-vintage-gold/20 hover:border-vintage-gold'}`;
+                item.innerHTML = `
+                    <div>
+                        <p class="text-xs font-serif text-vintage-ivory">${track.title}</p>
+                        <p class="text-[10px] text-vintage-parchment">${track.artist}</p>
+                    </div>
+                    <i class="fa-solid fa-play text-vintage-gold text-xs"></i>
+                `;
+                item.onclick = () => {
+                    loadTrack(idx);
+                    audioElement.play();
+                    gramophoneBox.classList.add('playing');
+                    discElement.classList.add('spinning');
+                    playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                    eqIndicator.classList.remove('hidden');
+                    closeMusicModal();
+                };
+                container.appendChild(item);
+            });
+        }
+
+        // --- SMART AUDIO DUCKING ---
+        let originalVolume = 0.8;
+        function duckAudioDown() {
+            if (!audioElement.paused) {
+                originalVolume = audioElement.volume;
+                audioElement.volume = 0.12;
+            }
+        }
+        function duckAudioUp() {
+            if (!audioElement.paused) {
+                audioElement.volume = originalVolume;
+            }
+        }
+
+        // --- INTRO SCREEN ---
+        function enterUniverse() {
+            const intro = document.getElementById('intro-overlay');
+            if (intro) {
+                intro.style.opacity = '0';
+                setTimeout(() => {
+                    intro.remove();
+                    audioElement.volume = 0.8;
+                    audioElement.play().then(() => {
+                        gramophoneBox.classList.add('playing');
+                        discElement.classList.add('spinning');
+                        playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                        eqIndicator.classList.remove('hidden');
+                    }).catch(() => {});
+                }, 1000);
+            }
+        }
+
+        // --- RELATIONSHIP COUNTER ---
+        const startDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+        function updateCounter() {
+            const now = new Date();
+            const diff = now - startDate;
+            document.getElementById('count-days').textContent = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(3, '0');
+            document.getElementById('count-hours').textContent = String(Math.floor((diff / (1000 * 60 * 60)) % 24)).padStart(2, '0');
+            document.getElementById('count-mins').textContent = String(Math.floor((diff / 1000 / 60) % 60)).padStart(2, '0');
+            document.getElementById('count-secs').textContent = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
+        }
+        setInterval(updateCounter, 1000);
+        updateCounter();
+
+        // --- LIGHTBOX & MODALS ---
+        function openLightboxMedia(url, type, title, caption) {
+            const modal = document.getElementById('lightbox-modal');
+            const container = document.getElementById('lightbox-content-container');
+            container.innerHTML = type === 'video'
+                ? `<video src="${url}" class="max-w-full max-h-[70vh] rounded shadow-2xl" controls autoplay onplay="duckAudioDown()" onpause="duckAudioUp()" onended="duckAudioUp()"></video>`
+                : `<img src="${url}" class="max-w-full max-h-[70vh] rounded shadow-2xl object-contain">`;
+            document.getElementById('lightbox-caption').textContent = `${title} — ${caption}`;
+            modal.classList.remove('hidden');
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox-modal').classList.add('hidden');
+            duckAudioUp();
+        }
+
+        function openLetterModal(title, body) {
+            document.getElementById('modal-letter-title').textContent = title;
+            document.getElementById('modal-letter-body').textContent = body;
+            document.getElementById('letter-modal').classList.remove('hidden');
+        }
+        function closeLetterModal() { document.getElementById('letter-modal').classList.add('hidden'); }
+
+        // --- SURPRISES ---
+        const compliments = [
+            "Thank you for applying sunscreen on me at Jhinaidah tour and staying right by my side.",
+            "Our first kiss in the swimming pool at the water park was the sweetest moment ever.",
+            "Your unconditional support in my web developer career means the world to me, Minnie.",
+            "I love how we started as online best friends and grew into souls planning to marry.",
+            "My parents adore you, and I am blessed to spend every day building our future together."
+        ];
+        function generateRandomCompliment() {
+            const box = document.getElementById('compliment-box');
+            const rand = compliments[Math.floor(Math.random() * compliments.length)];
+            box.style.opacity = '0';
+            setTimeout(() => {
+                box.textContent = `"${rand}"`;
+                box.style.opacity = '1';
+            }, 300);
+
+            // Floating Hearts
+            const container = document.getElementById('heart-particle-container');
+            for(let i=0; i<8; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '💖';
+                heart.className = 'absolute text-lg pointer-events-none animate-bounce';
+                heart.style.left = Math.random() * 90 + '%';
+                heart.style.top = Math.random() * 80 + '%';
+                container.appendChild(heart);
+                setTimeout(() => heart.remove(), 2000);
+            }
+        }
+
+        function triggerTimeMachine() {
+            let allClips = [];
+            lifeChapters.forEach(c => c.clips.forEach(clip => allClips.push(clip)));
+            if (allClips.length === 0) return alert("No clips in archive yet!");
+            const rand = allClips[Math.floor(Math.random() * allClips.length)];
+            openLightboxMedia(rand.url, rand.type, `✨ Time Machine: ${rand.title}`, rand.caption);
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        window.onload = function() {
+            initAudio();
+            renderLifeChapters();
+        };
+    </script>
+</body>
+</html>
